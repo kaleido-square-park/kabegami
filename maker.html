@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>カレイド壁紙メーカー</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2EF; --surface:#FFFFFF; --ink:#1E2B2A; --muted:#5B6B69; --line:#D3DCD8; --accent:#2F6F5E; --accent-ink:#FFFFFF; --field:#F6F8F7;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131918; --surface:#1C2423; --ink:#E4ECEA; --muted:#9AABA8; --line:#2F3B39; --accent:#7CC4AE; --accent-ink:#10201C; --field:#232D2B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131918; --surface:#1C2423; --ink:#E4ECEA; --muted:#9AABA8; --line:#2F3B39; --accent:#7CC4AE; --accent-ink:#10201C; --field:#232D2B;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 48px}
+header{padding:8px 0 18px}
+h1{font-size:1.6rem;line-height:1.3;margin:0 0 4px;font-weight:700;letter-spacing:.02em}
+.lead{margin:0;color:var(--muted);font-size:.95rem}
+.layout{display:grid;gap:20px}
+@media (min-width:900px){.layout{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}.preview-col{position:sticky;top:16px}}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:14px}
+.types button{font:inherit;font-size:.92rem;border:0;border-radius:10px;padding:9px 4px;background:transparent;color:var(--ink);cursor:pointer;line-height:1.3}
+.types button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;justify-content:center;align-items:center;min-height:300px}
+.frame{background:#1b1b1b;padding:10px;border-radius:30px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.frame canvas{display:block;width:100%;height:auto;border-radius:22px}
+.frame.phone{width:min(62vw,300px)}
+.frame.wide{width:100%;border-radius:14px;padding:8px}
+.frame.wide canvas{border-radius:8px}
+.frame.wide.chromebook{padding:8px 8px 22px}
+.size-note{margin:8px 2px 0;color:var(--muted);font-size:.82rem;text-align:center}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:6px 18px}
+fieldset{border:0;border-bottom:1px solid var(--line);margin:0;padding:16px 0}
+fieldset:last-of-type{border-bottom:0}
+legend{font-weight:700;font-size:1rem;padding:0;margin-bottom:8px;float:left;width:100%}
+legend + *{clear:both}
+.row{display:grid;gap:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:grid;gap:3px;font-size:.86rem;color:var(--muted)}
+input[type="text"],input[type="month"],select{font:inherit;font-size:1rem;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+.pick{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-size:.95rem;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:8px 14px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700;font-size:1.05rem;padding:12px 18px;width:100%}
+.file-name{font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;position:relative}
+.sw[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:2px}
+.sw.auto{background:conic-gradient(#e4547a,#f2b134,#5bb26a,#3a6fd8,#9a5bd6,#e4547a)}
+.sw input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.sw.custom{background:var(--field)}
+.sw.custom::after{content:"+";position:absolute;inset:0;display:grid;place-items:center;font-size:1.2rem;color:var(--muted)}
+.check{display:flex;align-items:center;gap:8px;font-size:.95rem}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.hint{font-size:.86rem;color:var(--muted);margin:6px 0 0}
+.save{margin-top:14px;display:grid;gap:8px}
+.howto{background:var(--field);border-radius:12px;padding:10px 14px;font-size:.88rem;color:var(--ink);margin:0}
+.privacy{font-size:.82rem;color:var(--muted);margin:14px 2px 0}
+.hidden{display:none !important}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));z-index:20}
+.overlay img{max-width:100%;max-height:72vh;border-radius:10px}
+.overlay p{color:#fff;margin:0;text-align:center}
+.status{min-height:1.3em;font-size:.88rem;color:var(--muted);margin:0;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>カレイド壁紙メーカー</h1>
+    <p class="lead">子どもたちの作品とカレイドのロゴで、スマホ・Chromebook・オンライン会議の壁紙をつくります。</p>
+  </header>
+
+  <div class="layout">
+    <section class="preview-col" aria-label="プレビュー">
+      <div class="types" role="group" aria-label="壁紙の種類">
+        <button type="button" data-type="phone" aria-pressed="true">スマホ</button>
+        <button type="button" data-type="chromebook" aria-pressed="false">Chromebook</button>
+        <button type="button" data-type="meeting" aria-pressed="false">オンライン会議</button>
+      </div>
+      <div class="stage">
+        <div class="frame phone" id="frame"><canvas id="cv" aria-label="壁紙のプレビュー"></canvas></div>
+      </div>
+      <p class="size-note" id="sizeNote"></p>
+    </section>
+
+    <section class="panel" aria-label="設定">
+      <fieldset>
+        <legend>作品</legend>
+        <div class="row">
+          <div class="pick">
+            <label class="btn" for="artFile">作品の画像を選ぶ</label>
+            <input id="artFile" type="file" accept="image/*" class="hidden">
+            <span class="file-name" id="artName">いまは見本の絵です</span>
+          </div>
+          <label class="f">大きさ<input id="zoom" type="range" min="100" max="300" value="100"></label>
+          <div class="two">
+            <label class="f">左右の位置<input id="posX" type="range" min="0" max="100" value="50"></label>
+            <label class="f">上下の位置<input id="posY" type="range" min="0" max="100" value="50"></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>ロゴ</legend>
+        <div class="row">
+          <div class="pick">
+            <label class="btn" for="logoFile">ロゴの画像を選ぶ</label>
+            <input id="logoFile" type="file" accept="image/*" class="hidden">
+            <span class="file-name" id="logoName">未選択のときは文字で「カレイドスクエアパーク」と入ります</span>
+          </div>
+          <label class="f">ロゴの色
+            <select id="logoTone">
+              <option value="auto">パネルに合わせて白か黒にする</option>
+              <option value="original">元の色のまま</option>
+              <option value="white">白</option>
+              <option value="black">黒</option>
+            </select>
+          </label>
+          <p class="hint">背景が透明なPNGだときれいに乗ります。</p>
+        </div>
+      </fieldset>
+
+      <fieldset id="calField">
+        <legend>カレンダー</legend>
+        <div class="row">
+          <label class="check"><input id="showCal" type="checkbox" checked>カレンダーを入れる</label>
+          <label class="f">月<input id="month" type="month"></label>
+          <p class="hint">日曜・祝日と土曜は色分けします（祝日は2026〜2027年分）。</p>
+        </div>
+      </fieldset>
+
+      <fieldset id="nameField" class="hidden">
+        <legend>名前の表示</legend>
+        <div class="two">
+          <label class="f">名前<input id="dispName" type="text" placeholder="例：羽田 健亮"></label>
+          <label class="f">肩書き<input id="dispTitle" type="text" placeholder="例：代表取締役CEO"></label>
+        </div>
+        <p class="hint">空欄なら名前は入りません。</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>パネルの色</legend>
+        <div class="swatches" role="group" aria-label="パネルの色">
+          <button type="button" class="sw auto" data-color="auto" aria-pressed="true" title="作品から色をとる" aria-label="作品から色をとる"></button>
+          <button type="button" class="sw" data-color="#FFFFFF" style="background:#FFFFFF" aria-pressed="false" aria-label="白"></button>
+          <button type="button" class="sw" data-color="#26302F" style="background:#26302F" aria-pressed="false" aria-label="墨"></button>
+          <button type="button" class="sw" data-color="#3F5BA0" style="background:#3F5BA0" aria-pressed="false" aria-label="青"></button>
+          <button type="button" class="sw" data-color="#D0789C" style="background:#D0789C" aria-pressed="false" aria-label="桃"></button>
+          <button type="button" class="sw" data-color="#5A9A5E" style="background:#5A9A5E" aria-pressed="false" aria-label="緑"></button>
+          <span class="sw custom" aria-pressed="false" id="customWrap" title="好きな色"><input id="customColor" type="color" value="#E0A23A" aria-label="好きな色"></span>
+        </div>
+        <p class="hint" id="autoHint">いまは作品からとった色です。</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>作品のクレジット</legend>
+        <div class="two">
+          <label class="f">作品タイトル<input id="artTitle" type="text" placeholder="例：秋の山"></label>
+          <label class="f">作者名<input id="artist" type="text" placeholder="例：はると"></label>
+        </div>
+        <p class="hint">載せる前に、本人と保護者の了解をとってください。</p>
+      </fieldset>
+
+      <div class="save">
+        <button type="button" class="btn primary" id="saveBtn">画像を保存</button>
+        <button type="button" class="btn" id="photoBtn">スマホの写真に入れる（長押しで保存）</button>
+        <p class="status" id="status" role="status"></p>
+        <p class="howto" id="howto"></p>
+      </div>
+      <p class="privacy">選んだ画像はこのブラウザの中だけで処理され、どこにも送信されません。</p>
+    </section>
+  </div>
+</div>
+
+<div class="overlay hidden" id="overlay" role="dialog" aria-modal="true" aria-label="保存用の画像">
+  <img id="overlayImg" alt="できあがった壁紙">
+  <p>画像を長押し（Chromebookは右クリック）して保存してください。</p>
+  <button type="button" class="btn" id="overlayClose">閉じる</button>
+</div>
+
+<script>
+(function(){
+  const TYPES = {
+    phone:      {w:1179, h:2556, label:"1179×2556px（iPhoneのロック画面サイズ。Androidでもそのまま使えます）"},
+    chromebook: {w:2560, h:1440, label:"2560×1440px（16:9。Chromebookの画面に合わせて自動で調整されます）"},
+    meeting:    {w:1920, h:1080, label:"1920×1080px（Google Meet・Zoomの推奨サイズ）"}
+  };
+  const HOWTO = {
+    phone: "iPhone：写真に保存 →「設定」→「壁紙」→「新しい壁紙を追加」で選びます。時計の下にカレンダーが来る配置です。",
+    chromebook: "Chromebook：保存した画像をファイルアプリで右クリック →「壁紙として設定」。下のシェルフにかからない配置です。",
+    meeting: "Google Meet：会議画面の「背景を変更」→「画像を追加」で選びます。自分の画面では左右反転して見えますが、相手には正しく見えています。"
+  };
+  const HOLIDAYS = new Set([
+    "2026-01-01","2026-01-12","2026-02-11","2026-02-23","2026-03-20","2026-04-29","2026-05-03","2026-05-04","2026-05-05","2026-05-06","2026-07-20","2026-08-11","2026-09-21","2026-09-22","2026-09-23","2026-10-12","2026-11-03","2026-11-23",
+    "2027-01-01","2027-01-11","2027-02-11","2027-02-23","2027-03-21","2027-03-22","2027-04-29","2027-05-03","2027-05-04","2027-05-05","2027-07-19","2027-08-11","2027-09-20","2027-09-23","2027-10-11","2027-11-03","2027-11-23"
+  ]);
+  const FONT = '"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif';
+  const MONTH_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  const $ = id => document.getElementById(id);
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const state = {type:"phone", art:null, logo:null, panel:"auto", autoColor:"#4F7F5A"};
+
+  // 既定の月 = 来月
+  (function(){
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()+1);
+    $("month").value = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  })();
+
+  // 見本の絵（ランダムな筆あと）
+  function makeSampleArt(){
+    const c = document.createElement("canvas"); c.width = 1600; c.height = 1600;
+    const g = c.getContext("2d");
+    let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+    g.fillStyle = "#F3EDE2"; g.fillRect(0,0,1600,1600);
+    const pal = ["#3E9B5C","#7CC36B","#C9DD5A","#F2C14E","#E57A9B","#4A73C9","#2F5D3A","#F7F2D8","#9ED3C4"];
+    for(let i=0;i<1400;i++){
+      const x = rnd()*1700-50, y = rnd()*1700-50, r = 14+rnd()*70;
+      g.save(); g.translate(x,y); g.rotate(rnd()*Math.PI);
+      g.globalAlpha = .55+rnd()*.45;
+      g.fillStyle = pal[Math.floor(Math.pow(rnd(),1.4)*pal.length)];
+      g.beginPath(); g.ellipse(0,0,r,r*(.25+rnd()*.5),0,0,Math.PI*2); g.fill();
+      g.restore();
+    }
+    return c;
+  }
+  state.art = makeSampleArt();
+
+  // 作品から色をとる
+  function extractColor(img){
+    const s = 48, c = document.createElement("canvas"); c.width = s; c.height = s;
+    const g = c.getContext("2d"); g.drawImage(img,0,0,s,s);
+    const d = g.getImageData(0,0,s,s).data;
+    const buckets = Array.from({length:12},()=>({n:0,r:0,g:0,b:0}));
+    for(let i=0;i<d.length;i+=4){
+      const [h,sa,l] = rgb2hsl(d[i],d[i+1],d[i+2]);
+      if(sa<.25||l<.15||l>.85) continue;
+      const k = Math.floor(h*12)%12, bk = buckets[k];
+      bk.n++; bk.r+=d[i]; bk.g+=d[i+1]; bk.b+=d[i+2];
+    }
+    const best = buckets.reduce((a,b)=>b.n>a.n?b:a);
+    if(!best.n) return "#4F5B5A";
+    let [h,sa] = rgb2hsl(best.r/best.n,best.g/best.n,best.b/best.n);
+    sa = Math.min(.6,Math.max(.3,sa));
+    return hsl2hex(h,sa,.4);
+  }
+  function rgb2hsl(r,g,b){
+    r/=255; g/=255; b/=255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2; let h=0,s=0;
+    if(mx!==mn){const d=mx-mn; s=l>.5?d/(2-mx-mn):d/(mx+mn);
+      h = mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4); h/=6;}
+    return [h,s,l];
+  }
+  function hsl2hex(h,s,l){
+    const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);const c=l-a*Math.max(-1,Math.min(k-3,9-k,1));return Math.round(c*255).toString(16).padStart(2,"0")};
+    return "#"+f(0)+f(8)+f(4);
+  }
+  function luminance(hex){
+    const n=parseInt(hex.slice(1),16), r=(n>>16)/255, g=((n>>8)&255)/255, b=(n&255)/255;
+    const t=v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);
+    return .2126*t(r)+.7152*t(g)+.0722*t(b);
+  }
+  state.autoColor = extractColor(state.art);
+
+  function panelColor(){ return state.panel==="auto" ? state.autoColor : state.panel; }
+
+  // 角の丸い多角形
+  function roundPoly(g, pts, r){
+    g.beginPath();
+    const n = pts.length;
+    const mid = (a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    const start = mid(pts[n-1],pts[0]);
+    g.moveTo(start[0],start[1]);
+    for(let i=0;i<n;i++){
+      const p = pts[i], q = pts[(i+1)%n];
+      g.arcTo(p[0],p[1],q[0],q[1],r);
+    }
+    g.closePath();
+  }
+
+  function drawArt(W,H){
+    const img = state.art, iw = img.naturalWidth||img.width, ih = img.naturalHeight||img.height;
+    const zoom = $("zoom").value/100;
+    const scale = Math.max(W/iw,H/ih)*zoom;
+    const dw = iw*scale, dh = ih*scale;
+    const px = $("posX").value/100, py = $("posY").value/100;
+    ctx.drawImage(img,(W-dw)*px,(H-dh)*py,dw,dh);
+  }
+
+  function tintedLogo(color){
+    const L = state.logo, c = document.createElement("canvas");
+    c.width = L.naturalWidth; c.height = L.naturalHeight;
+    const g = c.getContext("2d"); g.drawImage(L,0,0);
+    g.globalCompositeOperation = "source-in"; g.fillStyle = color; g.fillRect(0,0,c.width,c.height);
+    return c;
+  }
+
+  // ロゴ（なければ文字）を枠内に描く。描いた高さを返す
+  function drawLogo(x,y,maxW,maxH,ink,align){
+    align = align||"left";
+    if(state.logo){
+      const tone = $("logoTone").value;
+      let src = state.logo;
+      if(tone==="white") src = tintedLogo("#FFFFFF");
+      else if(tone==="black") src = tintedLogo("#1E2626");
+      else if(tone==="auto") src = tintedLogo(ink);
+      const iw = src.naturalWidth||src.width, ih = src.naturalHeight||src.height;
+      const s = Math.min(maxW/iw,maxH/ih), w = iw*s, h = ih*s;
+      ctx.drawImage(src, align==="right"?x-w:x, y, w, h);
+      return h;
+    }
+    const size = Math.round(maxH*.42);
+    ctx.fillStyle = ink; ctx.font = `700 ${size}px ${FONT}`; ctx.textAlign = align; ctx.textBaseline = "top";
+    fitText("カレイドスクエアパーク", x, y, maxW, size, 700);
+    return size*1.2;
+  }
+
+  function fitText(text,x,y,maxW,size,weight){
+    let s = size;
+    ctx.font = `${weight} ${s}px ${FONT}`;
+    while(ctx.measureText(text).width>maxW && s>10){ s-=2; ctx.font = `${weight} ${s}px ${FONT}`; }
+    ctx.fillText(text,x,y);
+  }
+
+  function creditText(){
+    const t = $("artTitle").value.trim(), a = $("artist").value.trim();
+    if(t&&a) return `《${t}》 ${a}`;
+    if(t) return `《${t}》`;
+    return a;
+  }
+
+  function monthInfo(){
+    const v = $("month").value || "2026-11";
+    const [y,m] = v.split("-").map(Number);
+    return {y, m};
+  }
+
+  // カレンダー：左上(x,y)、幅w、行の高さrh
+  function drawCalendar(x,y,w,rh,ink){
+    const {y:yy, m} = monthInfo();
+    const first = new Date(yy,m-1,1).getDay(), days = new Date(yy,m,0).getDate();
+    const light = luminance(panelColor())<.45;
+    const SUN = light?"#FFC4CC":"#C8344B", SAT = light?"#BFDAFF":"#2C64C8";
+    const cw = w/7;
+    const heads = ["日","月","火","水","木","金","土"];
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `700 ${Math.round(rh*.36)}px ${FONT}`;
+    heads.forEach((h,i)=>{
+      ctx.fillStyle = i===0?SUN:i===6?SAT:ink;
+      ctx.globalAlpha = .85; ctx.fillText(h, x+cw*i+cw/2, y+rh*.4); ctx.globalAlpha = 1;
+    });
+    // 区切り線
+    ctx.strokeStyle = ink; ctx.globalAlpha = .25; ctx.lineWidth = Math.max(1,rh*.025);
+    ctx.beginPath(); ctx.moveTo(x, y+rh*.82); ctx.lineTo(x+w, y+rh*.82); ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.font = `500 ${Math.round(rh*.46)}px ${FONT}`;
+    let rows = 0;
+    for(let d=1; d<=days; d++){
+      const idx = first+d-1, col = idx%7, row = Math.floor(idx/7);
+      rows = row+1;
+      const key = `${yy}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      ctx.fillStyle = (col===0||HOLIDAYS.has(key))?SUN:col===6?SAT:ink;
+      ctx.fillText(String(d), x+cw*col+cw/2, y+rh*1.35+row*rh);
+    }
+    return rh*1.35 + (rows-1)*rh + rh*.5;
+  }
+
+  function drawMonthTitle(xRight, baseline, bigSize, ink){
+    const {y, m} = monthInfo();
+    ctx.fillStyle = ink; ctx.textAlign = "right"; ctx.textBaseline = "alphabetic";
+    ctx.font = `700 ${bigSize}px ${FONT}`;
+    ctx.fillText(String(m), xRight, baseline);
+    ctx.font = `500 ${Math.round(bigSize*.17)}px ${FONT}`;
+    ctx.globalAlpha = .85;
+    ctx.fillText(`${y}  ${MONTH_EN[m-1]}`, xRight, baseline + bigSize*.3);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawCredit(x, y, maxW, size, ink, align){
+    const c = creditText(); if(!c) return;
+    ctx.fillStyle = ink; ctx.globalAlpha = .9; ctx.textAlign = align||"left"; ctx.textBaseline = "alphabetic";
+    fitText(c, x, y, maxW, size, 500); ctx.globalAlpha = 1;
+  }
+
+  function inkFor(color){ return luminance(color)>.45 ? "#1E2626" : "#FFFFFF"; }
+
+  function renderPhone(W,H){
+    drawArt(W,H);
+    const col = panelColor(), ink = inkFor(col), cal = $("showCal").checked;
+    if(cal){
+      const L=70, R=W-70, topL=1380, topR=1220, bot=2300;
+      ctx.fillStyle = col; roundPoly(ctx, [[L,topL],[R,topR],[R,bot],[L,bot]], 56); ctx.fill();
+      drawLogo(130, 1440, 470, 120, ink);
+      drawMonthTitle(R-60, 1470, 230, ink);
+      drawCalendar(120, 1590, W-240, 88, ink);
+      drawCredit(130, bot-48, W-260, 36, ink);
+    } else {
+      const L=70, R=W-70, topL=1980, topR=1880, bot=2300;
+      ctx.fillStyle = col; roundPoly(ctx, [[L,topL],[R,topR],[R,bot],[L,bot]], 56); ctx.fill();
+      drawLogo(130, 2040, 520, 130, ink);
+      drawCredit(130, bot-50, W-260, 38, ink);
+    }
+  }
+
+  function renderChromebook(W,H){
+    drawArt(W,H);
+    const col = panelColor(), ink = inkFor(col), cal = $("showCal").checked;
+    const R = W-90, top = 90;
+    if(cal){
+      const bot = H-170, TL = R-780, BL = R-900;
+      ctx.fillStyle = col; roundPoly(ctx, [[TL,top],[R,top],[R,bot],[BL,bot]], 48); ctx.fill();
+      const cx = R-660, cw = 600;
+      drawLogo(cx, top+70, 420, 110, ink);
+      drawMonthTitle(R-60, top+390, 210, ink);
+      const used = drawCalendar(cx, top+470, cw, 84, ink);
+      drawCredit(cx, bot-46, cw, 32, ink);
+    } else {
+      const bot = H-170, h = 300, TL = R-640, BL = R-700;
+      ctx.fillStyle = col; roundPoly(ctx, [[TL,bot-h],[R,bot-h],[R,bot],[BL,bot]], 44); ctx.fill();
+      drawLogo(R-560, bot-h+60, 480, 120, ink);
+      drawCredit(R-560, bot-50, 500, 32, ink);
+    }
+  }
+
+  function renderMeeting(W,H){
+    drawArt(W,H);
+    const col = panelColor(), ink = inkFor(col);
+    const L = 60, top = 60, bot = H-60, TR = 600, BR = 500;
+    ctx.fillStyle = col; roundPoly(ctx, [[L,top],[TR,top],[BR,bot],[L,bot]], 40); ctx.fill();
+    drawLogo(L+60, top+60, 400, 130, ink);
+    const name = $("dispName").value.trim(), title = $("dispTitle").value.trim();
+    if(name||title){
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = ink;
+      if(title){ ctx.globalAlpha=.85; fitText(title, L+60, 680, 400, 32, 500); ctx.globalAlpha=1; }
+      if(name){ fitText(name, L+60, title?750:740, 400, 60, 700); }
+    }
+    drawCredit(L+60, bot-56, 380, 28, ink);
+  }
+
+  let renderToken = 0;
+  async function render(){
+    const token = ++renderToken;
+    const t = TYPES[state.type];
+    const txt = "0123456789日月火水木金土カレイドスクエアパーク《》 " + MONTH_EN.join("") + $("artTitle").value + $("artist").value + $("dispName").value + $("dispTitle").value;
+    try{
+      await Promise.all([
+        document.fonts.load(`700 40px "Zen Maru Gothic"`, txt),
+        document.fonts.load(`500 40px "Zen Maru Gothic"`, txt)
+      ]);
+    }catch(e){}
+    if(token!==renderToken) return;
+    cv.width = t.w; cv.height = t.h;
+    ctx.clearRect(0,0,t.w,t.h);
+    if(state.type==="phone") renderPhone(t.w,t.h);
+    else if(state.type==="chromebook") renderChromebook(t.w,t.h);
+    else renderMeeting(t.w,t.h);
+  }
+
+  function setType(type){
+    state.type = type;
+    document.querySelectorAll(".types button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.type===type)));
+    const fr = $("frame");
+    fr.className = "frame " + (type==="phone"?"phone":"wide "+type);
+    $("calField").classList.toggle("hidden", type==="meeting");
+    $("nameField").classList.toggle("hidden", type!=="meeting");
+    $("sizeNote").textContent = TYPES[type].label;
+    $("howto").textContent = HOWTO[type];
+    $("status").textContent = "";
+    render();
+  }
+
+  function loadImage(file){
+    return new Promise((res,rej)=>{
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = ()=>res(img); img.onerror = rej; img.src = url;
+    });
+  }
+
+  $("artFile").addEventListener("change", async e=>{
+    const f = e.target.files[0]; if(!f) return;
+    try{
+      state.art = await loadImage(f);
+      state.autoColor = extractColor(state.art);
+      $("artName").textContent = f.name;
+      $("zoom").value = 100; $("posX").value = 50; $("posY").value = 50;
+      render();
+    }catch(err){ $("artName").textContent = "この画像は読み込めませんでした。JPEGかPNGで選び直してください。"; }
+  });
+  $("logoFile").addEventListener("change", async e=>{
+    const f = e.target.files[0]; if(!f) return;
+    try{ state.logo = await loadImage(f); $("logoName").textContent = f.name; render(); }
+    catch(err){ $("logoName").textContent = "この画像は読み込めませんでした。PNGで選び直してください。"; }
+  });
+
+  document.querySelectorAll(".types button").forEach(b=>b.addEventListener("click",()=>setType(b.dataset.type)));
+  ["zoom","posX","posY","month","showCal","logoTone","artTitle","artist","dispName","dispTitle"].forEach(id=>{
+    $(id).addEventListener("input", render);
+  });
+
+  function selectSwatch(el){
+    document.querySelectorAll(".sw").forEach(s=>s.setAttribute("aria-pressed", String(s===el)));
+    $("autoHint").classList.toggle("hidden", state.panel!=="auto");
+  }
+  document.querySelectorAll(".sw[data-color]").forEach(b=>b.addEventListener("click",()=>{
+    state.panel = b.dataset.color; selectSwatch(b); render();
+  }));
+  $("customColor").addEventListener("input", e=>{
+    state.panel = e.target.value.toUpperCase();
+    $("customWrap").style.background = e.target.value;
+    selectSwatch($("customWrap")); render();
+  });
+
+  // 保存
+  function fileName(){
+    const {y,m} = monthInfo();
+    const kind = {phone:"スマホ",chromebook:"Chromebook",meeting:"会議背景"}[state.type];
+    const cal = state.type!=="meeting" && $("showCal").checked;
+    const tail = cal ? `_${y}-${String(m).padStart(2,"0")}` : "";
+    const t = ($("artTitle").value.trim() || $("artist").value.trim()).replace(/[\\/:*?"<>|]/g,"");
+    return `カレイド壁紙_${kind}${tail}${t ? "_"+t : ""}.png`;
+  }
+  function makeBlob(){
+    return render().then(()=>new Promise(res=>cv.toBlob(res,"image/png")));
+  }
+  $("overlayClose").addEventListener("click",()=>$("overlay").classList.add("hidden"));
+
+  $("saveBtn").addEventListener("click", async ()=>{
+    $("status").textContent = "画像をつくっています…";
+    const blob = await makeBlob();
+    if(!blob){ $("status").textContent = "画像をつくれませんでした。もう一度押してください。"; return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = fileName();
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    $("status").textContent = "保存しました（「ダウンロード」フォルダに入ります）。";
+  });
+  $("photoBtn").addEventListener("click", async ()=>{
+    const blob = await makeBlob(); if(!blob) return;
+    $("overlayImg").src = URL.createObjectURL(blob);
+    $("overlay").classList.remove("hidden"); $("overlayClose").focus();
+  });
+
+  setType("phone");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>カレイドの壁紙プレゼント</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#1E2B2A; --muted:#5B6B69; --line:#D6DEDA; --accent:#2F6F5E; --accent-soft:#E2EEE9;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131918; --surface:#1C2423; --ink:#E4ECEA; --muted:#9AABA8; --line:#2F3B39; --accent:#7CC4AE; --accent-soft:#22312D;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131918; --surface:#1C2423; --ink:#E4ECEA; --muted:#9AABA8; --line:#2F3B39; --accent:#7CC4AE; --accent-soft:#22312D;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:28px 18px 56px}
+h1{font-size:clamp(1.35rem,6vw,1.75rem);line-height:1.35;margin:0 0 10px;font-weight:700;letter-spacing:.03em}
+.intro{margin:0 0 18px;max-width:36em}
+.howto{background:var(--accent-soft);border-radius:16px;padding:14px 18px;margin:0 0 28px}
+.howto strong{display:block;margin-bottom:2px}
+.howto p{margin:0;font-size:.95rem}
+h2{font-size:1.2rem;margin:30px 0 12px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+@media (min-width:640px){.grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+.card{display:block;width:100%;padding:0;border:0;background:var(--surface);border-radius:16px;overflow:hidden;cursor:pointer;color:inherit;font:inherit;text-align:left;border:1px solid var(--line)}
+.card .thumb{aspect-ratio:9/16;background:var(--line);overflow:hidden}
+.card.wide .thumb{aspect-ratio:16/9}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card span{display:block;padding:6px 12px 8px;font-size:.85rem;color:var(--muted)}
+.card.wide{grid-column:span 2}
+.msg{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:22px;text-align:center}
+.note{margin-top:40px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+.note p{margin:0 0 4px}
+.viewer{position:fixed;inset:0;background:rgba(10,16,15,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));z-index:10}
+.viewer[hidden]{display:none}
+.viewer img{max-width:100%;max-height:74vh;border-radius:12px;-webkit-touch-callout:default}
+.viewer p{color:#fff;margin:0;text-align:center;font-size:.95rem}
+.viewer .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{font:inherit;font-size:.95rem;border-radius:999px;padding:9px 20px;border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;text-decoration:none;cursor:pointer}
+.btn.fill{background:#fff;color:#1E2B2A;border-color:#fff;font-weight:700}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.viewer :focus-visible{outline-color:#fff}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>カレイドの壁紙プレゼント</h1>
+  <p class="intro">カレイドの子どもたちとクルーがいっしょに描いた絵を、スマホの壁紙にしました。気に入った絵を選んで、ご家族でお使いください。</p>
+  <div class="howto">
+    <strong>保存のしかた</strong>
+    <p>絵をタップして大きく表示したら、画像を長押しします。iPhoneは「写真に保存」、Androidは「画像をダウンロード」を選んでください。</p>
+  </div>
+
+  <div id="list"><p class="msg">壁紙を読み込んでいます…</p></div>
+
+  <div class="note">
+    <p>ご家庭で楽しむ範囲でお使いください。ほかの場所への転載や販売はご遠慮ください。</p>
+    <p>カレイドスクエアパーク（トラインスミス株式会社）</p>
+  </div>
+</main>
+
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="壁紙を保存">
+  <img id="viewerImg" alt="">
+  <p>画像を長押しして保存してください。</p>
+  <div class="acts">
+    <a class="btn fill" id="dlLink" href="#" target="_blank" rel="noopener">ファイルとして保存</a>
+    <button type="button" class="btn" id="closeBtn">閉じる</button>
+  </div>
+</div>
+
+<script>
+// ▼ Apps Script を「ウェブアプリ」としてデプロイしたときのURLをここに貼る
+const API_URL = "https://script.google.com/macros/s/AKfycbzRtKrjklhb7da3PbxbHnOqS4-CV-FIStIbcWa5bdcsXVPqgns58-xEeM3eEhNTPB3b1Q/exec";
+
+(function(){
+  const list = document.getElementById("list");
+  const api = new URLSearchParams(location.search).get("api") || API_URL;
+
+  const thumbUrl = it => it.url || `https://lh3.googleusercontent.com/d/${it.id}=w600`;
+  const fullUrl  = it => it.url || `https://lh3.googleusercontent.com/d/${it.id}=s0`;
+  const dlUrl    = it => it.url || `https://drive.google.com/uc?export=download&id=${it.id}`;
+
+  function monthOf(name){
+    const m = name.match(/(20\d{2})-(\d{2})/);
+    return m ? {y:+m[1], m:+m[2], key:m[1]+"-"+m[2]} : null;
+  }
+  function isWide(name){ return /(chromebook|パソコン|PC|会議)/i.test(name); }
+
+  function render(items){
+    const now = new Date(), cur = now.getFullYear()*12 + now.getMonth();
+    const months = {}, always = [];
+    items.forEach(it=>{
+      const mo = monthOf(it.name);
+      if(!mo){ always.push(it); return; }
+      if(mo.y*12 + (mo.m-1) < cur) return; // 過ぎた月は出さない
+      (months[mo.key] = months[mo.key] || {mo, items:[]}).items.push(it);
+    });
+    const keys = Object.keys(months).sort();
+    list.textContent = "";
+    if(!keys.length && !always.length){
+      list.innerHTML = '<p class="msg">いま配っている壁紙はありません。また見に来てください。</p>';
+      return;
+    }
+    keys.forEach(k=>section(`${months[k].mo.m}月のカレンダー`, months[k].items));
+    if(always.length) section("いつでも使える壁紙", always);
+  }
+
+  function section(title, items){
+    const h = document.createElement("h2"); h.textContent = title; list.appendChild(h);
+    const g = document.createElement("div"); g.className = "grid";
+    items.sort((a,b)=>(isWide(a.name)-isWide(b.name)) || a.name.localeCompare(b.name,"ja"));
+    items.forEach(it=>{
+      const wide = isWide(it.name);
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "card" + (wide ? " wide" : "");
+      const t = document.createElement("div"); t.className = "thumb";
+      const img = document.createElement("img");
+      img.loading = "lazy"; img.alt = "壁紙"; img.src = thumbUrl(it);
+      t.appendChild(img);
+      const s = document.createElement("span"); s.textContent = wide ? "パソコン用" : "スマホ用";
+      img.addEventListener("load", ()=>{
+        if(img.naturalWidth > img.naturalHeight && !b.classList.contains("wide")){
+          b.classList.add("wide"); s.textContent = "パソコン用";
+        }
+      });
+      b.append(t, s);
+      b.addEventListener("click", ()=>openViewer(it, b));
+      g.appendChild(b);
+    });
+    list.appendChild(g);
+  }
+
+  const viewer = document.getElementById("viewer"), vImg = document.getElementById("viewerImg");
+  let lastFocus = null;
+  function openViewer(it, from){
+    lastFocus = from;
+    vImg.src = fullUrl(it);
+    document.getElementById("dlLink").href = dlUrl(it);
+    viewer.hidden = false;
+    document.getElementById("closeBtn").focus();
+  }
+  function closeViewer(){ viewer.hidden = true; vImg.removeAttribute("src"); if(lastFocus) lastFocus.focus(); }
+  document.getElementById("closeBtn").addEventListener("click", closeViewer);
+  viewer.addEventListener("click", e=>{ if(e.target === viewer) closeViewer(); });
+  document.addEventListener("keydown", e=>{ if(e.key === "Escape" && !viewer.hidden) closeViewer(); });
+
+  fetch(api).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d=>render(d.items || []))
+    .catch(()=>{ list.innerHTML = '<p class="msg">壁紙を読み込めませんでした。少し時間をおいて、ページを開き直してください。</p>'; });
+})();
+</script>
+</body>
+</html>
